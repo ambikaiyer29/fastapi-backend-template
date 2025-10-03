@@ -1,0 +1,849 @@
+{
+	"info": {
+		"_postman_id": "5eec73ff-88f2-4700-ad91-42aaf69b1f8c",
+		"name": "#FastAPI SK e2e Test",
+		"description": "A complete, sequential testing collection for the FastAPI Multi-Tenant SaaS Starter Kit.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "112231",
+		"_collection_link": "https://speeding-eclipse-115506.postman.co/workspace/77c8235d-4777-427e-bffe-df449ae8921e/collection/112231-5eec73ff-88f2-4700-ad91-42aaf69b1f8c?action=share&source=collection_link&creator=112231"
+	},
+	"item": [
+		{
+			"name": "00 - Health & Public",
+			"item": [
+				{
+					"name": "[P01] Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[P02] Public Endpoint",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/public",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"public"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Basic health checks to ensure the API is running."
+		},
+		{
+			"name": "01 - Superadmin Lifecycle",
+			"item": [
+				{
+					"name": "[S01] Onboard Tenant A (Innovate Inc.)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"pm.collectionVariables.set(\"tenant_a_id\", response.id);",
+									"pm.collectionVariables.set(\"tenant_a_admin_user_id\", response.admin_user_id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{superadmin_jwt}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Innovate Inc.\",\n  \"slug\": \"innovate-inc\",\n  \"admin_email\": \"admin@innovate.com\",\n  \"admin_password\": \"a-very-secure-password\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tenants",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tenants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[S02] Onboard Tenant B (Cyberdyne)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"pm.collectionVariables.set(\"tenant_b_id\", response.id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{superadmin_jwt}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Cyberdyne Systems\",\n  \"slug\": \"cyberdyne\",\n  \"admin_email\": \"admin@cyberdyne.com\",\n  \"admin_password\": \"a-very-secure-password\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tenants",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tenants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[S03] List All Tenants",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{superadmin_jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/superadmin/tenants",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"superadmin",
+								"tenants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[S04] Update Tenant A",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{superadmin_jwt}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Innovate Corp (Updated)\",\n  \"tenant_data\": {\n    \"plan\": \"premium\",\n    \"active\": true\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/superadmin/tenants/{{tenant_a_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"superadmin",
+								"tenants",
+								"{{tenant_a_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[S05] Delete Tenant B",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{superadmin_jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/superadmin/tenants/{{tenant_b_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"superadmin",
+								"tenants",
+								"{{tenant_b_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Actions performed by the Superadmin (SaaS Owner). Requires `superadmin_jwt`."
+		},
+		{
+			"name": "02 - Tenant Admin Lifecycle (Tenant A)",
+			"item": [
+				{
+					"name": "Upload Logo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant_a_admin_jwt}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/ambikaiyer/Downloads/Logo  RAGyfied.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/v1/uploads?folder=logos",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"uploads"
+							],
+							"query": [
+								{
+									"key": "folder",
+									"value": "logos"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X POST \"http://127.0.0.1:8000/api/v1/uploads?folder=logos\" \\\n-H \"Authorization: Bearer TENANT_A_ADMIN_JWT\" \\\n-F \"file=@logo.png\""
+					},
+					"response": []
+				},
+				{
+					"name": "Update Tenant with Logo",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant_a_admin_jwt}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"logo_path\" : \"c88e00ec-2b61-4d87-be7a-7bd127d1ea37/logos/f1776195-a69e-4c90-a546-4ca6092001d2.png\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/v1/tenants/me",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"tenants",
+								"me"
+							]
+						},
+						"description": "Generated from cURL: curl -X POST \"http://127.0.0.1:8000/api/v1/uploads?folder=logos\" \\\n-H \"Authorization: Bearer TENANT_A_ADMIN_JWT\" \\\n-F \"file=@logo.png\""
+					},
+					"response": []
+				},
+				{
+					"name": "Get my tenant info",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant_a_admin_jwt}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/v1/tenants/me",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"tenants",
+								"me"
+							]
+						},
+						"description": "Generated from cURL: curl -X POST \"http://127.0.0.1:8000/api/v1/uploads?folder=logos\" \\\n-H \"Authorization: Bearer TENANT_A_ADMIN_JWT\" \\\n-F \"file=@logo.png\""
+					},
+					"response": []
+				},
+				{
+					"name": "[A01] Create Custom Role (Editor)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"pm.collectionVariables.set(\"editor_role_id\", response.id);",
+									"",
+									"console.log(\"editor role set and get now : \");",
+									"console.log(pm.collectionVariables.get(\"editor_role_id\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant_a_admin_jwt}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Editor\",\n  \"permissions\": [\n    \"ITEMS_READ\",\n    \"ITEMS_CREATE\",\n    \"ITEMS_UPDATE\"\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"roles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[A02] List Roles in Tenant",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant_a_admin_jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"roles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[A03] Invite User with Editor Role",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"pm.collectionVariables.set(\"editor_user_id\", response.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant_a_admin_jwt}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"editor@innovate.com\",\n  \"role_id\": \"{{editor_role_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/invite",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"invite"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[A04] List Users in Tenant",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant_a_admin_jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[A05] Delete Invited User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant_a_admin_jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/{{editor_user_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{editor_user_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Actions performed by a Tenant Admin. Requires `tenant_a_admin_jwt`."
+		},
+		{
+			"name": "03 - Tenant User Lifecycle (Editor in Tenant A)",
+			"item": [
+				{
+					"name": "Upload Item image",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tenant_a_admin_jwt}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/ambikaiyer/Downloads/output.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/v1/uploads?folder=items",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"uploads"
+							],
+							"query": [
+								{
+									"key": "folder",
+									"value": "items"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X POST \"http://127.0.0.1:8000/api/v1/uploads?folder=logos\" \\\n-H \"Authorization: Bearer TENANT_A_ADMIN_JWT\" \\\n-F \"file=@logo.png\""
+					},
+					"response": []
+				},
+				{
+					"name": "[U01] Create Item (Allowed)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"pm.collectionVariables.set(\"item_id\", response.id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{editor_user_jwt}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Flux Capacitor1\",\n  \"price\": 1223,\n  \"quantity\": 1,\n  \"image_path\" :\"c88e00ec-2b61-4d87-be7a-7bd127d1ea37/items/4078db47-cac6-4143-a1fd-5664b1382717.png\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/items",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[U02] List Items (Allowed)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{editor_user_jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/items",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[U02] GET item",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{editor_user_jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/items/47aae9e3-712c-4f96-b2e8-fea5de76b895",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"items",
+								"47aae9e3-712c-4f96-b2e8-fea5de76b895"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[U03] Delete Item (FORBIDDEN)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{editor_user_jwt}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/items/{{item_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"items",
+								"{{item_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[U04] Invite User (FORBIDDEN)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{editor_user_jwt}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"another.editor@innovate.com\",\n  \"role_id\": \"{{editor_role_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/invite",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"invite"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Actions performed by a non-admin tenant user. Requires `editor_user_jwt`."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://127.0.0.1:8000"
+		},
+		{
+			"key": "superadmin_jwt",
+			"value": ""
+		},
+		{
+			"key": "tenant_a_admin_jwt",
+			"value": ""
+		},
+		{
+			"key": "tenant_a_id",
+			"value": ""
+		},
+		{
+			"key": "tenant_a_admin_user_id",
+			"value": ""
+		},
+		{
+			"key": "tenant_b_id",
+			"value": ""
+		},
+		{
+			"key": "editor_role_id",
+			"value": ""
+		},
+		{
+			"key": "editor_user_id",
+			"value": ""
+		},
+		{
+			"key": "editor_user_jwt",
+			"value": ""
+		},
+		{
+			"key": "item_id",
+			"value": ""
+		}
+	]
+}
