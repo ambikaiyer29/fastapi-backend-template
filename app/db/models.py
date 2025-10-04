@@ -36,6 +36,7 @@ class Tenant(Base):
     subscription_status = Column(String, default="inactive")
     current_period_ends_at = Column(DateTime, nullable=True)
     external_subscription_id = Column(String, nullable=True)
+    external_customer_id = Column(String, nullable=True)
 
     users = relationship("User", back_populates="tenant", cascade="all, delete-orphan")
     roles = relationship("UserRole", back_populates="tenant", cascade="all, delete-orphan")

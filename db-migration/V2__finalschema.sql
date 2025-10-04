@@ -555,3 +555,8 @@ CREATE TABLE IF NOT EXISTS "fastapiSK".webhook_events (
     -- Store the full payload for debugging and reprocessing if needed
     payload JSONB
 );
+
+
+-- Add a column to the 'tenants' table to store the customer ID from Stripe.
+ALTER TABLE "fastapiSK".tenants
+ADD COLUMN IF NOT EXISTS external_customer_id TEXT;
