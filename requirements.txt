@@ -1,0 +1,22 @@
+fastapi
+uvicorn[standard]
+prometheus-fastapi-instrumentator
+python-jose[cryptography]
+python-dotenv
+supabase
+pydantic-settings
+pydantic[email]
+
+sqlalchemy[asyncio]
+asyncpg
+alembic
+psycopg2-binary # Alembic needs a sync driver to run migrations
+
+python-multipart
+
+passlib[bcrypt]
+
+httpx
+standardwebhooks
+
+stripe
