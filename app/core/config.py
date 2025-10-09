@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, List
 
 from pydantic_settings import BaseSettings
 from functools import lru_cache
@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     STRIPE_PUBLISHABLE_KEY: str | None = None
     STRIPE_WEBHOOK_SECRET: str | None = None
     PAYMENT_GATEWAY: Literal["stripe", "dodo"] = "dodo"
+
+    CORS_ORIGINS_STR: str = "http://localhost:3000"
+
+    @property
+    def CORS_ORIGINS(self) -> List[str]:
+        return [origin.strip() for origin in self.CORS_ORIGINS_STR.split(',')]
+
 
     def model_post_init(self, __context) -> None:
         if self.PAYMENT_GATEWAY == "stripe" and not all([self.STRIPE_API_KEY, self.STRIPE_PUBLISHABLE_KEY, self.STRIPE_WEBHOOK_SECRET]):

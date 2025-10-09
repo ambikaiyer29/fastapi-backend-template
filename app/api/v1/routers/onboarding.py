@@ -10,6 +10,8 @@ from app.schemas.tenant_schemas import TenantRead, TenantOnboard
 
 router = APIRouter()
 
+# This is for the self-service onboarding flow. after the /auth/signup
+
 @router.post("/tenant", response_model=TenantRead, status_code=status.HTTP_201_CREATED)
 def onboard_new_tenant(
     payload: TenantOnboard,

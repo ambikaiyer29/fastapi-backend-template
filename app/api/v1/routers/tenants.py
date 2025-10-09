@@ -34,6 +34,12 @@ def create_tenant(
     in both Supabase Auth and the local database.
     """
     try:
+        if not payload.terms_accepted:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="You must accept the Terms and Conditions to proceed."
+            )
+
         new_tenant = tenant_crud.create_tenant_with_admin_user(
             db=db,
             tenant_data=payload,

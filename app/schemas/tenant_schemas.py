@@ -26,6 +26,7 @@ class TenantCreate(BaseModel):
     # Details for the tenant's first admin user
     admin_email: EmailStr = Field(..., description="Email for the tenant's primary admin")
     admin_password: str = Field(..., min_length=8, description="Password for the tenant's primary admin")
+    terms_accepted: bool = Field(..., description="User must explicitly accept the terms and conditions.")
 
 
 class TenantUpdate(BaseModel):

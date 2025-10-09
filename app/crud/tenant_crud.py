@@ -52,6 +52,7 @@ def create_tenant_with_admin_user(
         name=tenant_data.name,
         slug=tenant_data.slug,
         created_by=new_auth_user.id
+
     )
     db.add(new_tenant)
     db.flush()
@@ -73,7 +74,8 @@ def create_tenant_with_admin_user(
         email=tenant_data.admin_email,
         tenant_id=new_tenant.id,
         role_id=admin_role.id,
-        created_by=new_auth_user.id
+        created_by=new_auth_user.id,
+        terms_accepted_at=datetime.now(timezone.utc)
     )
     db.add(new_user_profile)
     db.flush()
