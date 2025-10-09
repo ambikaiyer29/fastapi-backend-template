@@ -39,11 +39,23 @@ class PlanUpdate(PlanBase):
     name: str | None = None # All fields are optional on update
     is_active: bool | None = None
 
+class PriceInfo(BaseModel):
+    """A simplified schema to represent price details from the payment provider."""
+    amount: int
+    currency: str
+    interval: str | None = None # e.g., "Month", "Year" for subscriptions
+
+
 class PlanRead(PlanBase):
     id: UUID
     created_at: datetime
     updated_at: datetime
     entitlements: List[PlanEntitlementRead] = []
+
+    # Enriched from Dodo Payments
+    description: str | None = None
+    image_url: str | None = None
+    price: PriceInfo | None = None
 
     class Config:
         from_attributes = True

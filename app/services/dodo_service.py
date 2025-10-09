@@ -14,9 +14,34 @@ class DodoPaymentsService:
         self.api_key = settings.DODO_API_KEY
         self.webhook_secret = settings.DODO_WEBHOOK_SECRET
         # Use the test URL from the docs for development
-        self.base_url = "https://test.dodopayments.com"
+        self.base_url = settings.DODO_BASE_URL
         # The standardwebhooks library instance
         self.webhook_verifier = Webhook(self.webhook_secret)
+
+    async def get_product_details(self, product_id: str) -> dict | None:
+        """
+        Fetches detailed information for a single product from the Dodo Payments API.
+        Returns None if the product is not found.
+        """
+        if not product_id:
+            return None
+
+        try:
+            async with httpx.AsyncClient() as client:
+                headers = {"Authorization": f"Bearer {self.api_key}"}
+                response = await client.get(
+                    f"{self.base_url}/products/{product_id}",
+                    headers=headers
+                )
+                if response.status_code == 404:
+                    return None
+                response.raise_for_status()
+                return response.json()
+        except httpx.HTTPStatusError as e:
+            print(f"Dodo Payments API error fetching product {product_id}: {e.response.text}")
+            # In a public pricing page, we might not want to crash the whole page if one product fails.
+            # Returning None allows us to handle this gracefully.
+            return None
 
     async def create_checkout_session(self, plan_id: str, success_url: str,
                                       cancel_url: str,

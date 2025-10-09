@@ -13,6 +13,7 @@ class Settings(BaseSettings):
 
     DODO_API_KEY: str | None = None
     DODO_WEBHOOK_SECRET: str | None = None
+    DODO_BASE_URL: str = "https://test.dodopayments.com"
 
     STRIPE_API_KEY: str | None = None
     STRIPE_PUBLISHABLE_KEY: str | None = None
