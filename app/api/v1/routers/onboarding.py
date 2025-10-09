@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from app.api.v1.dependencies import get_current_user, get_auth_rls_session
+from app.api.v1.dependencies import get_current_user, get_auth_rls_session, get_user_for_onboarding
 from app.api.v1.security import AuthenticatedUser
 from app.crud import tenant_crud # We will add a new function here
 from app.schemas.tenant_schemas import TenantRead, TenantOnboard
@@ -15,14 +15,15 @@ router = APIRouter()
 @router.post("/tenant", response_model=TenantRead, status_code=status.HTTP_201_CREATED)
 def onboard_new_tenant(
     payload: TenantOnboard,
-    db: Session = Depends(get_auth_rls_session),
-    current_user: AuthenticatedUser = Depends(get_current_user)
+    onboarding_data: tuple = Depends(get_user_for_onboarding)
 ):
     """
     Onboarding for a newly signed-up user to create their first tenant.
     This endpoint should only be called once per user.
     """
     # --- ADD THIS VALIDATION CHECK ---
+    current_user, db = onboarding_data
+    
     if not payload.terms_accepted:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

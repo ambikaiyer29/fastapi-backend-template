@@ -278,3 +278,46 @@ def get_system_db_session():
         db.close()
 
 
+def get_user_for_onboarding(
+        settings: Settings = Depends(get_settings),
+        jwt_credentials: HTTPAuthorizationCredentials | None = Depends(reusable_oauth2),
+) -> tuple[AuthenticatedUser, Session]:
+    """
+    A special dependency for the one-time tenant onboarding endpoint.
+
+    It validates the JWT, ensures the user is not already onboarded, and provides
+    a PRIVILEGED database session to allow the creation of the initial tenant.
+    """
+    if not jwt_credentials:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated.")
+
+    token_data = get_token_data(token=jwt_credentials, settings=settings)
+    user_id, email = token_data.get("user_id"), token_data.get("email")
+    if not user_id or not email:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token.")
+
+    # Construct a user object from the token data.
+    user = AuthenticatedUser(id=UUID(user_id), email=email, is_superadmin=False, tenant_id=None)
+
+    # We use a temporary privileged session for the checks and the operation.
+    db = SessionLocal()
+    try:
+        # 1. Elevate privileges for this session
+        db.execute(text("SET app.is_superadmin = 'true'"))
+
+        # 2. Check if user already has a profile. This query now works.
+        existing_profile = db.query(User).filter(User.id == user.id).first()
+        if existing_profile:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "User has already completed onboarding.")
+
+        # 3. Provide the user and the privileged session to the endpoint
+        yield user, db
+
+        # 4. If the endpoint succeeds, commit the transaction
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise e
+    finally:
+        # 5. Always close the session
+        db.close()
