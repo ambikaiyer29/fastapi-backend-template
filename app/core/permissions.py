@@ -49,7 +49,6 @@ class AppPermissions(Flag):
     CUSTOMERS_READ = auto()
     CUSTOMERS_UPDATE = auto()
     CUSTOMERS_DELETE = auto()
-
     # Convenience roles (combinations of permissions)
     TENANT_ADMIN_PERMISSIONS = (
             USERS_READ | USERS_INVITE | USERS_UPDATE_ROLE | USERS_DELETE |
@@ -60,20 +59,38 @@ class AppPermissions(Flag):
             CUSTOMERS_CREATE | CUSTOMERS_READ | CUSTOMERS_UPDATE | CUSTOMERS_DELETE
     )
 
+_permission_descriptions = {
+        AppPermissions.USERS_READ: "Can view users and their roles within the tenant.",
+        AppPermissions.USERS_INVITE: "Can invite new users to the tenant.",
+        AppPermissions.USERS_UPDATE_ROLE: "Can change the roles of other users.",
+        AppPermissions.USERS_DELETE: "Can remove users from the tenant.",
+        AppPermissions.ROLES_READ: "Can view roles and their permissions.",
+        AppPermissions.ROLES_CREATE: "Can create new custom roles.",
+        AppPermissions.ROLES_UPDATE: "Can update the permissions of existing roles.",
+        AppPermissions.ROLES_DELETE: "Can delete custom roles.",
+        AppPermissions.ITEMS_READ: "Can view items.",
+        AppPermissions.ITEMS_CREATE: "Can create new items.",
+        AppPermissions.ITEMS_UPDATE: "Can update existing items.",
+        AppPermissions.ITEMS_DELETE: "Can delete items.",
+        AppPermissions.CUSTOM_OBJECTS_CREATE: "Can create new custom object definitions.",
+        AppPermissions.CUSTOM_OBJECTS_READ: "Can view custom object definitions.",
+        AppPermissions.CUSTOM_OBJECTS_UPDATE: "Can update custom object definitions.",
+        AppPermissions.CUSTOM_OBJECTS_DELETE: "Can delete custom object definitions.",
+        AppPermissions.RECORDS_CREATE: "Can create new records for custom objects.",
+        AppPermissions.RECORDS_READ: "Can view records of custom objects.",
+        AppPermissions.RECORDS_UPDATE: "Can update records of custom objects.",
+        AppPermissions.RECORDS_DELETE: "Can delete records of custom objects.",
+        AppPermissions.CUSTOMERS_CREATE: "Can create new customer profiles.",
+        AppPermissions.CUSTOMERS_READ: "Can view customer profiles.",
+        AppPermissions.CUSTOMERS_UPDATE: "Can update customer profiles.",
+        AppPermissions.CUSTOMERS_DELETE: "Can delete customer profiles.",
+        AppPermissions.TENANT_ADMIN_PERMISSIONS: "Full Admin permission",
+    }
 
-    # You could define other common roles here, e.g.:
-    # TENANT_EDITOR_PERMISSIONS = ITEMS_READ | ITEMS_CREATE | ITEMS_UPDATE
-    # TENANT_VIEWER_PERMISSIONS = ITEMS_READ
-
-    # Superadmin permissions should ideally bypass all checks.
-    # Our current superadmin dependency handles this.
-
-    # Note: `auto()` assigns powers of 2 (1, 2, 4, 8, 16, etc.)
-    # Example: AppPermissions.USERS_READ.value would be 1
-    # AppPermissions.USERS_INVITE.value would be 2
-    # AppPermissions.USERS_READ | AppPermissions.USERS_INVITE would be 3
-
-    # print(f"DEBUG: The new TENANT_ADMIN_PERMISSIONS integer value is: {TENANT_ADMIN_PERMISSIONS}")
+    # This function will be our single source of truth for getting a description.
+def get_permission_description(permission: AppPermissions) -> str:
+    """Returns the description for a given AppPermissions member."""
+    return _permission_descriptions.get(permission, "No description available.")
 
 
 # print(f"DEBUG: The final TENANT_ADMIN_PERMISSIONS integer value is: {AppPermissions.TENANT_ADMIN_PERMISSIONS.value}")

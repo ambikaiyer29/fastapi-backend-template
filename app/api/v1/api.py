@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.api.v1.routers import tenants, health, users, roles, items, superadmin, uploads, auth, onboarding, audit_logs, \
-    api_keys, custom_objects, records, plans, public, subscriptions, webhooks, customers
+    api_keys, custom_objects, records, plans, public, subscriptions, webhooks, customers, permissions
 
 # This is the main router for the v1 API
 api_router = APIRouter()
@@ -16,6 +16,7 @@ api_router.include_router(items.router, prefix="/items", tags=["Items"])
 
 # Its endpoints will have /superadmin prefix and will use the get_superadmin dependency.
 api_router.include_router(superadmin.router, prefix="/superadmin", tags=["Superadmin"])
+api_router.include_router(permissions.router, prefix="/permissions", tags=["Permissions"])
 
 api_router.include_router(uploads.router, prefix="/uploads", tags=["File Uploads"])
 
