@@ -18,6 +18,30 @@ class DodoPaymentsService:
         # The standardwebhooks library instance
         self.webhook_verifier = Webhook(self.webhook_secret)
 
+    async def get_subscription_details(self, external_subscription_id: str) -> dict | None:
+        """
+        Fetches live subscription details from the Dodo Payments API.
+        Returns None if the subscription is not found.
+        """
+        if not external_subscription_id:
+            return None
+
+        try:
+            async with httpx.AsyncClient() as client:
+                headers = {"Authorization": f"Bearer {self.api_key}"}
+                response = await client.get(
+                    f"{self.base_url}/subscriptions/{external_subscription_id}",
+                    headers=headers
+                )
+                if response.status_code == 404:
+                    return None
+                response.raise_for_status()
+                return response.json()
+        except httpx.HTTPStatusError as e:
+            print(f"Dodo Payments API error fetching subscription {external_subscription_id}: {e.response.text}")
+            # Fail gracefully in case the provider is down
+            return None
+
     async def get_product_details(self, product_id: str) -> dict | None:
         """
         Fetches detailed information for a single product from the Dodo Payments API.

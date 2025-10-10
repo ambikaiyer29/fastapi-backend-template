@@ -22,13 +22,14 @@ router = APIRouter()
 @router.get("/me", response_model=SubscriptionDetailsRead)
 async def get_my_subscription_details(
         db: Session = Depends(get_auth_rls_session),
+        settings: Settings = Depends(get_settings),  # <-- Add settings dependency
         admin_user=Depends(get_tenant_admin)
 ):
     """
     Fetch the current subscription and usage details for the user's tenant.
     Restricted to Tenant Admins.
     """
-    # Fetch the tenant and their plan with entitlements in one query
+    # 1. Fetch our internal tenant data, including the plan and its entitlements
     tenant = db.query(Tenant).options(
         joinedload(Tenant.plan).joinedload(Plan.entitlements)
     ).filter(Tenant.id == db.user.tenant_id).first()
@@ -36,13 +37,15 @@ async def get_my_subscription_details(
     if not tenant or not tenant.plan:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No active subscription plan found for this tenant.")
 
-    # Fetch live data from Dodo Payments
-    # Note: We need a way to store the 'external_subscription_id'.
-    # For now, let's assume it's stored on the tenant object.
-    # We will need to add this column to the 'tenants' table.
-    dodo_data = await dodo_service.get_subscription_details(tenant.external_subscription_id)
+    # 2. Fetch live data from the configured payment provider
+    payment_provider_data = None
+    if settings.PAYMENT_GATEWAY == "stripe":
+        # Stripe's SDK is synchronous, so we don't need to await
+        payment_provider_data = stripe_service.get_subscription_details(tenant.external_subscription_id)
+    elif settings.PAYMENT_GATEWAY == "dodo":
+        payment_provider_data = await dodo_service.get_subscription_details(tenant.external_subscription_id)
 
-    # Calculate current usage for all metered features in the plan
+    # 3. Calculate current usage for all metered features
     current_usage: Dict[str, int] = {}
     for entitlement in tenant.plan.entitlements:
         if entitlement.entitlement_type == 'METER':
@@ -53,11 +56,12 @@ async def get_my_subscription_details(
             )
             current_usage[entitlement.feature_slug] = usage
 
+    # 4. Combine all data into the final response
     return SubscriptionDetailsRead(
         plan=tenant.plan,
         subscription_status=tenant.subscription_status,
         current_period_ends_at=tenant.current_period_ends_at,
-        payment_provider_data=dodo_data,
+        payment_provider_data=payment_provider_data,
         usage=current_usage
     )
 

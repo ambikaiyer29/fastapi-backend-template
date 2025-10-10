@@ -12,6 +12,27 @@ class StripeService:
         self.webhook_secret = settings.STRIPE_WEBHOOK_SECRET
         stripe.api_key = self.api_key
 
+    def get_subscription_details(self, external_subscription_id: str) -> dict | None:
+        """
+        Fetches live subscription details from the Stripe API.
+        Returns None if the subscription is not found.
+        """
+        if not external_subscription_id:
+            return None
+
+        try:
+            # The Stripe library uses synchronous calls
+            subscription = stripe.Subscription.retrieve(external_subscription_id)
+            return subscription.to_dict_recursive()  # Convert the Stripe object to a dictionary
+        except stripe.error.InvalidRequestError as e:
+            if "No such subscription" in str(e):
+                return None
+            print(f"Stripe API error fetching subscription {external_subscription_id}: {e}")
+            return None
+        except Exception as e:
+            print(f"Stripe generic error fetching subscription {external_subscription_id}: {e}")
+            return None
+
     def create_checkout_session(self, price_id: str, success_url: str, cancel_url: str, customer_email: str | None,
                                 client_reference_id: str) -> dict:
         """
