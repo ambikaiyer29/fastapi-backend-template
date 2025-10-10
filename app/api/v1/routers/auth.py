@@ -6,7 +6,8 @@ from supabase import create_client, Client, PostgrestAPIResponse
 
 from app.core.config import get_settings, Settings
 from app.schemas.user_schemas import CompleteInvite # <-- Add this import
-from app.api.v1.dependencies import get_auth_rls_session, get_current_user  # We need the user's session
+from app.api.v1.dependencies import get_auth_rls_session, get_current_user, \
+    get_current_user_pre_terms  # We need the user's session
 from app.api.v1.security import AuthenticatedUser
 from app.db.models import User
 from datetime import datetime, timezone
@@ -92,7 +93,9 @@ def complete_invited_user_setup(
         payload: CompleteInvite,
         # This endpoint is for an already-authenticated user (via Supabase's invite link)
         db: Session = Depends(get_auth_rls_session),
-        current_user: AuthenticatedUser = Depends(get_current_user)
+        # Use the 'pre_terms' version of the dependency that does NOT
+        # perform the terms acceptance check.
+        current_user: AuthenticatedUser = Depends(get_current_user_pre_terms)
 ):
     """
     Final step for an invited user. They set their password and accept the terms.
@@ -120,7 +123,7 @@ def complete_invited_user_setup(
         settings = get_settings()
         supabase_admin: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
         supabase_admin.auth.admin.update_user_by_id(
-            current_user.id,
+            str(current_user.id),
             {"password": payload.password}
         )
     except Exception as e:

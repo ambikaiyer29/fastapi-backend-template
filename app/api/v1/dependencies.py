@@ -321,3 +321,23 @@ def get_user_for_onboarding(
     finally:
         # 5. Always close the session
         db.close()
+
+
+def get_current_user_pre_terms(
+        db: Session = Depends(get_auth_rls_session)
+) -> AuthenticatedUser:
+    """
+    Retrieves the authenticated user from the session object WITHOUT
+    checking for terms of service acceptance.
+
+    This should ONLY be used for endpoints that are part of the
+    onboarding or terms-acceptance flow itself (e.g., /complete-invite).
+    """
+    user = getattr(db, "user", None)
+    if not user:
+        # This can happen if get_auth_rls_session fails authentication
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials."
+        )
+    return user
