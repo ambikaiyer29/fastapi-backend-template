@@ -31,7 +31,7 @@ def get_users_by_tenant(db: Session) -> list[User]:
 
 
 def invite_user(db: Session, invite_data: UserInvite, tenant_id: UUID, inviter_id: UUID,
-                supabase_admin: Client) -> User:
+                supabase_admin: Client, redirect_url: str) -> User:
     """Invites a user to a tenant and creates their profile."""
     # First, check if the role they are assigning belongs to their tenant
     role = db.query(UserRole).filter(UserRole.id == invite_data.role_id).first()
@@ -40,7 +40,11 @@ def invite_user(db: Session, invite_data: UserInvite, tenant_id: UUID, inviter_i
 
     try:
         # Use the admin invite method. This creates the auth user and sends a magic link.
-        response = supabase_admin.auth.admin.invite_user_by_email(invite_data.email)
+        response = supabase_admin.auth.admin.invite_user_by_email(
+            invite_data.email,
+            options={"redirect_to": redirect_url}
+        )
+
         invited_auth_user = response.user
         if not invited_auth_user:
             raise Exception("Failed to invite user in Supabase Auth.")

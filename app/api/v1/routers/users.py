@@ -73,7 +73,8 @@ def invite_new_user(
             invite_data=payload,
             tenant_id=current_user.tenant_id,
             inviter_id=current_user.id,
-            supabase_admin=supabase_admin
+            supabase_admin=supabase_admin,
+            redirect_url=settings.FRONTEND_ACCEPT_INVITE_URL
         )
         return new_user
     except ValueError as e:

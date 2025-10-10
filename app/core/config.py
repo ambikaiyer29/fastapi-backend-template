@@ -22,6 +22,8 @@ class Settings(BaseSettings):
 
     CORS_ORIGINS_STR: str = "http://localhost:3000"
 
+    FRONTEND_ACCEPT_INVITE_URL: str
+
     @property
     def CORS_ORIGINS(self) -> List[str]:
         return [origin.strip() for origin in self.CORS_ORIGINS_STR.split(',')]
