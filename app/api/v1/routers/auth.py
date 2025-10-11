@@ -27,7 +27,7 @@ class ForgotPassword(BaseModel):
 
 def get_supabase_client(settings: Settings = Depends(get_settings)) -> Client:
     """Dependency to get a supabase client using the anon key."""
-    return create_client(settings.SUPABASE_URL, settings.SUPABASE_ANON_KEY)
+    return create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
