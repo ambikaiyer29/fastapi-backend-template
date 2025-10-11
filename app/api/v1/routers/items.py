@@ -6,7 +6,7 @@ from uuid import UUID
 from supabase import create_client, Client
 from app.core.config import get_settings, Settings
 
-from app.api.v1.dependencies import get_auth_rls_session, require_permission  # Updated import
+from app.api.v1.dependencies import get_auth_rls_session, require_permission, get_current_user  # Updated import
 from app.api.v1.security import AuthenticatedUser
 from app.schemas.item_schemas import ItemCreate, ItemRead, ItemUpdate
 from app.crud import item_crud
@@ -19,7 +19,10 @@ router = APIRouter()
 def create_new_item(
         payload: ItemCreate,
         db: Session = Depends(get_auth_rls_session),
-        current_user: AuthenticatedUser = Depends(require_permission(AppPermissions.ITEMS_CREATE))  # Permission check
+        current_user: AuthenticatedUser = Depends(get_current_user),
+        # 2. Perform the permission check as a separate, "silent" dependency.
+        #    Use an underscore to indicate we don't need its return value.
+        _permission_check=Depends(require_permission(AppPermissions.ITEMS_CREATE)),
 ):
     """
     Create a new item within the user's tenant.
@@ -92,7 +95,8 @@ def update_existing_item(
         item_id: UUID,
         payload: ItemUpdate,
         db: Session = Depends(get_auth_rls_session),
-        current_user: AuthenticatedUser = Depends(require_permission(AppPermissions.ITEMS_UPDATE))  # Permission check
+        current_user: AuthenticatedUser = Depends(get_current_user),
+        _permission_check=Depends(require_permission(AppPermissions.ITEMS_UPDATE)),
 ):
     """Update an item's properties."""
     db_item = item_crud.get_item_by_id(db, item_id=item_id)
@@ -111,7 +115,7 @@ def update_existing_item(
 def delete_existing_item(
         item_id: UUID,
         db: Session = Depends(get_auth_rls_session),
-        current_user: AuthenticatedUser = Depends(require_permission(AppPermissions.ITEMS_DELETE))  # Permission check
+        _permission_check=Depends(require_permission(AppPermissions.ITEMS_DELETE)),
 ):
     """Delete an item."""
     db_item = item_crud.get_item_by_id(db, item_id=item_id)
